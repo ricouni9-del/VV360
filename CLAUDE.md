@@ -89,7 +89,8 @@ esse padrão (ver skill `vanessa-roteiro-html`).
 
 - **Fase 1 (feito)**: núcleo — grupo, painel de viabilidade, participantes na jornada
   Interesse → Confirmando → Confirmado.
-- **Fase 2**: hotsite público por grupo (padrão passaporte, vagas ao vivo, botões
-  "Tenho interesse" e "Quero mais detalhes"/WhatsApp) + geradores de prompt de flyer e
-  de roteiro.
+- **Fase 2 (feito)**: hotsite público por grupo em `/g/?t=TOKEN` (padrão passaporte,
+  vagas ao vivo, "Tenho interesse" cria participante, "Quero mais detalhes"/WhatsApp) +
+  geradores de prompt de flyer e de roteiro na ficha. Identidade da agência via
+  `AGENCIA_NOME/WHATSAPP/INSTAGRAM` e `SITE_URL` em `dados/config.php`.
 - **Fase 3**: participante confirmado vira venda no Financeiro e ganha portal/guia.

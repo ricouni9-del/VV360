@@ -101,6 +101,7 @@ switch ($p) {
     case 'modelo':   baixar_modelo(); break;
     case 'grupos':   pagina_grupos(); break;
     case 'grupo':    pagina_grupo((int)($_GET['id'] ?? 0)); break;
+    case 'grupoprompt': pagina_grupo_prompt((int)($_GET['id'] ?? 0)); break;
     case 'proposta': pagina_proposta((int)($_GET['id'] ?? 0)); break;
     case 'propostapdf': proposta_pdf((int)($_GET['id'] ?? 0)); break;
     case 'propostaclaude': proposta_claude((int)($_GET['id'] ?? 0)); break;
