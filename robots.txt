@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /painel/
+Disallow: /api/
+Disallow: /dados/
+Disallow: /crm/
+Disallow: /r/
+Disallow: /d/
+Disallow: /s/
+
+Sitemap: https://vanessaviagenseturismo.com.br/sitemap.xml

@@ -1,0 +1,37 @@
+# === VV360 — arquivos que NUNCA vão para o repositório ===
+
+# Configuração real de cada instalação (use dados/config.exemplo.php como modelo)
+/dados/config.php
+
+# Chave de criptografia dos documentos — fica FORA da pasta pública em produção.
+# Se nunca estiver no repositório, não há risco de vazar. Faça backup à parte.
+chave-documentos.php
+**/chave-documentos.php
+
+# Banco de dados e dados de cada agência
+*.sqlite
+*.sqlite-*
+/vv-crm-dados/
+/dados/*.sqlite*
+
+# Conteúdo gerado em produção
+/roteiros/
+/crm/roteiros/
+/docs/
+/crm/docs/
+/d/docs/
+
+# Uploads de clientes/documentos
+/uploads/
+
+# Pacotes gerados
+*.zip
+/dist/
+
+# Lixo de sistema e editores
+.DS_Store
+Thumbs.db
+*.log
+*~
+.vscode/
+.idea/

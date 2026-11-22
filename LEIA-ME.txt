@@ -1,0 +1,227 @@
+VANESSA VIAGENS E TURISMO - SITE PARA PUBLICAÇÃO
+Domínio: https://vanessaviagenseturismo.com.br
+
+ANTES DE PUBLICAR
+[ ] Renovar o Cadastur (o certificado enviado venceu em 17/09/2026).
+[ ] Confirmar a licença das fotos de Bonito, Gramado e Maldivas (tamanho típico de prévia de banco pago).
+[ ] Se possível, trocar as fotos por versões maiores (1600 px de largura). Basta substituir o arquivo em img/destinos/ mantendo o mesmo nome.
+[ ] Pedir a um advogado ou contador uma revisão da política de privacidade (privacidade.html).
+
+PUBLICAR NA GODADDY (plano de Hospedagem de Sites com cPanel)
+1. No painel da GoDaddy, abrir a hospedagem > cPanel > Gerenciador de Arquivos.
+2. Entrar na pasta public_html (apagar o index padrão da GoDaddy, se houver).
+3. Carregar o arquivo .zip e usar a opção "Extrair". Os arquivos devem ficar diretamente
+   dentro de public_html (index.html na raiz, não dentro de uma subpasta).
+4. Ativar "Mostrar arquivos ocultos" e conferir se o .htaccess foi extraído.
+5. Ativar o certificado SSL (https) no painel da hospedagem ANTES de o .htaccess entrar em uso;
+   sem SSL ativo, o redirecionamento para https deixa o site fora do ar.
+
+APONTAR O DOMÍNIO
+- Onde o domínio estiver registrado (normalmente Registro.br para .com.br), alterar apenas o
+  registro "A" de vanessaviagenseturismo.com.br (e o "www", se houver) para o IP da hospedagem
+  informado pela GoDaddy.
+- NÃO alterar os registros MX: são eles que mantêm o e-mail vanessa@vanessaviagenseturismo.com.br funcionando.
+- A propagação pode levar algumas horas.
+
+DEPOIS DE NO AR
+- Testar o formulário de proposta (deve abrir o WhatsApp da Vanessa com a mensagem preenchida).
+- Cadastrar o site no Google Search Console e enviar o sitemap:
+  https://vanessaviagenseturismo.com.br/sitemap.xml
+- Criar/atualizar o perfil da empresa no Google (Google Meu Negócio) com o link do site.
+- Colocar o link do site na bio do Instagram.
+
+FALE COM A GENTE (ELOGIOS, DÚVIDAS E RECLAMAÇÕES)
+As mensagens do formulário "Fale com a gente" são gravadas no banco de dados do CRM e aparecem
+no menu "Mensagens" do CRM (o antigo endereço /painel/ agora redireciona para lá).
+- Abas: Novas, Todas, Elogios, Dúvidas e Reclamações. O número de mensagens novas aparece no menu.
+- Elogios com autorização do cliente: um administrador ajusta nome, viagem e erros de digitação e
+  clica em "Publicar no site". O elogio aparece na seção "O que nossos clientes contam na volta".
+  "Tirar do site" remove. O arquivo depoimentos.json é só a cópia pública, gerada automaticamente.
+- Dúvida: o botão "Transformar em lead" cria o lead no funil com um clique.
+- Reclamação: cria automaticamente uma tarefa URGENTE para o mesmo dia.
+- Se quem escreveu já é cliente (mesmo e-mail ou telefone), a mensagem aparece na ficha dele.
+- Cada mensagem nova também gera um aviso por e-mail para EMAIL_AVISO (confira o spam no início).
+
+PÁGINAS DE DESTINO E GOOGLE (atualização)
+O site agora tem uma página para cada destino em /destinos/ (13 páginas + página geral),
+com texto próprio, foto com descrição, dados estruturados e botão que abre o formulário
+de proposta já com o destino preenchido.
+
+Depois de subir esta versão:
+1. No Google Search Console, em "Sitemaps", reenvie: sitemap.xml
+   (agora com 16 endereços e as imagens dos destinos).
+2. Em "Inspeção de URL", solicite a indexação da página inicial e de 3 ou 4 destinos
+   que a Vanessa mais quer vender, por exemplo:
+   https://vanessaviagenseturismo.com.br/destinos/orlando.html
+   https://vanessaviagenseturismo.com.br/destinos/japao.html
+3. Nos anúncios do Google Ads por destino, use a página do destino como URL final.
+4. Para acrescentar um destino novo, basta pedir: a página, o sitemap e o carrossel
+   são atualizados juntos.
+
+ATENÇÃO AO SUBIR: não sobrescreva dados/config.php nem depoimentos.json (elogios publicados).
+
+CRM (pasta crm/)
+Endereço: https://vanessaviagenseturismo.com.br/crm/
+
+INSTALAÇÃO (uma vez só)
+1. Em dados/config.php, preencha a chave de instalação, por exemplo:
+      const CRM_CHAVE_INSTALACAO = 'uma-chave-qualquer-dificil';
+2. Suba os arquivos e acesse /crm/. Informe a chave e crie o usuário administrador
+   (nome, e-mail e senha de no mínimo 10 caracteres).
+3. Depois de instalado, apague a chave (deixe '') no config.php.
+4. Em Equipe, o administrador cadastra as demais pessoas.
+
+ONDE FICAM OS DADOS
+O banco do CRM é criado automaticamente FORA da pasta pública, em /home/SEU_USUARIO/vv-crm-dados/.
+Se o servidor não permitir, ele fica em public_html/dados/, que também é bloqueada para a internet.
+
+ROTINAS AUTOMÁTICAS (cPanel > Cron Jobs)
+Troque SEU_USUARIO pelo usuário do cPanel (aparece no canto da tela do cPanel):
+- Lembretes por e-mail, todo dia às 7h:
+    0 7 * * *  php /home/SEU_USUARIO/public_html/crm/inc/cron.php lembretes
+- Backup diário do CRM às 2h (guarda os últimos 30 dias):
+    0 2 * * *  php /home/SEU_USUARIO/public_html/crm/inc/cron.php backup
+Os backups ficam na pasta "backups", ao lado do banco. De vez em quando, baixe uma cópia pelo cPanel.
+
+COMO FUNCIONA
+- Todo pedido de proposta do site vira "Novo lead" no CRM na hora, com tarefa de primeiro contato
+  e a origem (Site, Google Ads, Busca Google, Instagram, Facebook), seja enviado por e-mail ou
+  pelo WhatsApp. Pedidos que chegam direto no WhatsApp da Vanessa, sem passar pelo site,
+  entram pelo botão "+ Novo lead".
+- Tudo fica no banco de dados do CRM: clientes, leads, histórico, tarefas, pedidos e mensagens
+  do site. O backup diário cobre tudo, e excluir um cliente (LGPD) apaga também as mensagens
+  e os elogios dele, inclusive do site.
+- Mover um lead de etapa cria lembretes automáticos (acompanhar proposta, conferir reservas,
+  mensagem de boa viagem, contato pós-viagem).
+- LGPD: na página do cliente há "Baixar dados do cliente" e "Excluir cliente".
+  Não registre números de passaporte, documentos ou cartões.
+- Segurança: após 5 senhas erradas, o acesso fica bloqueado por 15 minutos. Recomendado também
+  proteger a pasta crm pela "Privacidade de diretório" do cPanel.
+
+AO ATUALIZAR O SITE NO FUTURO: não sobrescreva dados/config.php, depoimentos.json
+nem nada dentro de dados/ (mensagens, e possivelmente o banco do CRM e backups).
+
+ATUALIZAÇÃO: PAINEL INTEGRADO AO CRM
+1. Suba os arquivos novos, exceto dados/config.php e depoimentos.json.
+2. No seu dados/config.php, a linha PAINEL_SENHA não é mais usada e pode ser apagada.
+3. Os arquivos dados/mensagens.json e dados/limite.json, se existirem, não são mais usados
+   e podem ser apagados.
+
+CLIENTES, DOCUMENTOS E HISTÓRICO DE VIAGENS
+- Clientes > "+ Novo cliente": cadastro completo sem precisar criar lead, com endereço (o CEP
+  preenche rua, bairro, cidade e UF automaticamente) e documentos: CPF (validado), RG e
+  passaporte com emissão e validade. Os acompanhantes também têm documentos.
+- Os documentos ficam CRIPTOGRAFADOS no banco. Na ficha aparecem mascarados; o botão
+  "Ver e editar documentos" mostra tudo, e cada abertura fica registrada em Equipe > atividade.
+- A busca de clientes aceita CPF.
+- A tela Início avisa passaportes vencidos ou que vencem em menos de 6 meses.
+- Menu "Viagens": histórico de todas as viagens, com filtros por ano e destino, total vendido e
+  destinos mais vendidos. Viagens podem ser registradas na ficha do cliente e, quando um lead
+  chega em "Pós-viagem", a viagem entra sozinha no histórico.
+
+IMPORTAR O HISTÓRICO PELA PLANILHA
+1. Viagens > "Baixar modelo de planilha" (o arquivo modelo-historico-viagens.xlsx também está
+   neste pacote). Uma linha por viagem; obrigatórios: Nome do cliente, Destino e Data de ida.
+2. Viagens > "Importar planilha": envie o .xlsx (ou .csv). O CRM mostra uma prévia de cada linha,
+   indicando cliente novo ou existente e linhas com problema, e só grava depois que você confirmar.
+3. Clientes repetidos são reconhecidos pelo CPF, e-mail ou telefone. Reimportar a mesma planilha
+   não duplica viagens.
+
+MUITO IMPORTANTE: CHAVE DOS DOCUMENTOS
+No primeiro uso, o CRM cria o arquivo chave-documentos.php ao lado do banco
+(/home/SEU_USUARIO/vv-crm-dados/). SEM ESSE ARQUIVO OS DOCUMENTOS FICAM ILEGÍVEIS.
+- Nunca apague nem edite esse arquivo.
+- Baixe uma cópia pelo cPanel e guarde em local seguro, separado do computador do dia a dia.
+- O backup diário também guarda uma cópia dele na pasta backups.
+
+FINANCEIRO (menu "Financeiro")
+Quem acessa: administradores e quem receber "Dar Financeiro" em Equipe. Os demais usuários
+não veem o menu, os valores no lead nem os relatórios. Toda alteração fica registrada.
+
+COMO FUNCIONA
+- Quando um lead vai para "Fechado", o CRM cria a venda e abre a tela financeira dela.
+  (Pelo lead também há o botão "Abrir financeiro da venda".)
+- Fornecedores e serviços: lance cada item da viagem (aéreo, hotel, operadora, seguro...) e diga
+  como o cliente paga:
+    * "Paga à agência" (markup/revenda): informe o valor ao cliente e o custo pago ao fornecedor.
+    * "Paga direto ao fornecedor": a agência ganha só a comissão.
+  Nos dois casos dá para informar comissão (% ou R$), inclusive somada ao markup.
+  Receita da agência = (valor ao cliente − custo, quando passa pela agência) + comissão.
+- Pagamentos do cliente: "Lançar parcelas" gera entrada + parcelas mensais. O CRM avisa se as
+  parcelas não batem com o que o cliente paga à agência. Botão "Recebido" em cada parcela.
+- Fornecedores: prazo de pagamento e botão "Marcar pago". Comissões: data prevista e "Recebida".
+- Painel do mês: vendido, receita e margem, recebido, parcelas vencidas, a pagar em 15 dias,
+  comissões a receber, listas para dar baixa, vendas do mês, mês a mês, receita por destino e
+  por canal de origem (Google Ads, Instagram, indicação...).
+- "Exportar para o contador": planilha (CSV) do mês com vendas por fornecedor, recebimentos de
+  clientes e comissões recebidas. Valide com o contador o formato que ele prefere.
+- Alertas: parcelas vencidas ou vencendo em 3 dias, pagamentos a fornecedores próximos e
+  comissões atrasadas aparecem na tela Início e no e-mail diário de quem tem acesso ao Financeiro.
+- O CRM não processa cobranças nem guarda dados de cartão: registra apenas o que foi
+  combinado e recebido.
+
+PROPOSTAS (na página de cada lead, quadro "Propostas")
+- "+ Nova proposta" cria um rascunho (v1) com a "Opção A". Lance cada fornecedor do mesmo jeito
+  que no Financeiro (paga à agência ou direto ao fornecedor, custo, comissão). Quem tem acesso ao
+  Financeiro vê também a receita e a margem de cada opção.
+- Mais de uma alternativa para o cliente comparar? "Adicionar outra opção" (pode copiar os itens
+  da primeira e só ajustar o que muda).
+- Roteiro: anexe o arquivo HTML do roteiro (padrão passaporte) e o CRM gera um link privado para
+  o cliente, com botões "Copiar link" e "Enviar pelo WhatsApp". O link não aparece no Google e
+  abre isolado do restante do site. Também dá para informar um link externo.
+- "Marcar como enviada": a versão fica congelada, o lead vai para "Proposta enviada", o valor do
+  funil passa a ser o da proposta e é criada a tarefa de acompanhamento.
+- Ajustes pedidos pelo cliente: "Criar nova versão" copia tudo para a v2; a v1 fica guardada.
+- "Cliente aprovou esta opção": o lead vai para "Fechado" e os fornecedores e valores da opção
+  aprovada entram sozinhos na venda do Financeiro. Se o lead for fechado pelo funil e a proposta
+  tiver uma única opção, isso acontece automaticamente; com várias opções, o CRM pede para escolher.
+- Validade da cotação: a tela Início e o e-mail diário avisam cotações vencendo ou vencidas.
+- Lead perdido: as propostas enviadas ficam como "Recusada", com os valores guardados para análise.
+- Os roteiros anexados ficam na pasta "roteiros", ao lado do banco do CRM. Inclua essa pasta nos
+  backups do cPanel.
+
+CÓDIGO DE ATENDIMENTO
+- Todo lead recebe um código no formato VV-2026-0042 (sigla, ano e sequência que recomeça a
+  cada ano). Leads antigos receberam o código automaticamente, pela data de criação.
+- Propostas: VV-2026-0042-v2. A venda no Financeiro usa o mesmo código do lead.
+- O código aparece no funil, no lead, nas propostas, no Financeiro, nas planilhas exportadas, no
+  e-mail que a Vanessa recebe e no e-mail de confirmação do cliente ("Protocolo").
+- A busca do funil aceita o código. Links públicos (roteiros) continuam usando um código aleatório.
+
+TERMÔMETRO DO LEAD (🔥 Quente · 🌤 Morno · ❄️ Frio)
+- O CRM calcula uma nota de 0 a 100 para cada lead em aberto e explica os motivos na página do
+  lead: origem, datas e orçamento informados, viagem próxima, contatos recentes, abertura do
+  roteiro pelo cliente, pedidos de ajuste, cotação vencida, tempo parado na etapa etc.
+- "Sua percepção": a Vanessa pode ajustar a temperatura manualmente; o ajuste vale por 14 dias
+  e depois volta ao cálculo automático.
+- Abertura do roteiro: quando o cliente abre o link privado, o CRM registra no histórico e
+  aquece o lead. Aberturas pela equipe (link clicado dentro do CRM) e prévias do WhatsApp não contam.
+- Funil: "Ordenar pelos mais quentes". Tela Início: "Prioridade de hoje" (abriram o roteiro nas
+  últimas 48 h, quentes sem contato há 2 dias, leads esfriando). E-mail diário: quentes sem contato.
+- "Esfriando" usa a fotografia diária do termômetro feita pela rotina de lembretes (Cron Jobs).
+
+CONVERSÕES DO GOOGLE ADS
+1. No Google Ads, crie a ação de conversão (o caminho é parecido com: Metas > Conversões >
+   "+ Criar ação de conversão" > Site). Categoria: "Enviar formulário de lead".
+   Contagem: "Uma" por clique. Em "Configurar tag", escolha instalar manualmente.
+2. O Google mostra um trecho com send_to: 'AW-123456789/AbCdEfGh...'.
+   Copie para o arquivo js/google-ads.js:
+      id: 'AW-123456789'
+      rotuloProposta: 'AbCdEfGh...'   (a parte depois da barra)
+   Opcional: crie uma segunda conversão "Fale com a gente" (secundária) e preencha rotuloContato.
+3. Suba o js/google-ads.js e teste com o Google Tag Assistant fazendo um pedido de proposta.
+Como funciona:
+- A conversão é enviada quando o pedido de proposta é registrado (por e-mail ou WhatsApp), com o
+  código do lead como identificador, o que evita contar o mesmo pedido duas vezes.
+- LGPD: na primeira visita aparece um aviso de cookies. Sem aceite, nenhum cookie de publicidade é
+  gravado (modo de consentimento do Google). O rodapé tem "Preferências de cookies".
+- O código do clique no anúncio (gclid) fica guardado no lead. No futuro, isso permite informar ao
+  Google quais leads viraram vendas (conversões offline).
+- Enquanto o id estiver vazio, o arquivo não carrega nada e o aviso de cookies não aparece.
+
+CÂMBIO (orçamentos em dólar/euro)
+Para a cotação do dia aparecer como sugestão nos orçamentos, agende no cPanel > Cron Jobs:
+  0 6 * * *  php /home/SEU_USUARIO/public_html/crm/inc/cron.php cambio
+Busca a cotação uma vez por dia (dólar e euro) e guarda no sistema. A taxa é sempre editável
+na proposta e no fechamento; se a internet do servidor falhar, mantém a última taxa.
+A estimativa de "turismo" é o comercial + ~4%; ajuste na proposta conforme sua operadora.
