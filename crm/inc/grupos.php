@@ -165,11 +165,29 @@ function pagina_grupo($id) {
             <div><label>Moeda</label><select name="moeda"><?php foreach (MOEDAS as $k => $v) echo '<option value="' . $k . '"' . ($g['moeda'] === $k ? ' selected' : '') . '>' . h($k) . '</option>'; ?></select></div>
           </div>
           <label>Link do roteiro (opcional)</label><input name="roteiro_url" value="<?= h($g['roteiro_url']) ?>" placeholder="https://...">
-          <label>Descrição interna</label><textarea name="descricao" placeholder="Anotações sobre o grupo, fornecedores, condições..."><?= h($g['descricao']) ?></textarea>
+          <label>Chamada do hotsite <span class="mudo" style="font-weight:400">(texto público, aparece no site da excursão)</span></label><textarea name="chamada" placeholder="Um parágrafo convidativo sobre a viagem — o que a torna especial. NÃO use este campo para anotações internas."><?= h($g['chamada'] ?? '') ?></textarea>
+          <label>Descrição interna <span class="mudo" style="font-weight:400">(só para você, nunca aparece no hotsite)</span></label><textarea name="descricao" placeholder="Anotações sobre o grupo, fornecedores, condições..."><?= h($g['descricao']) ?></textarea>
           <label>Status</label><select name="status"><?php foreach (GRUPO_STATUS as $k => $v) echo '<option value="' . $k . '"' . ($g['status'] === $k ? ' selected' : '') . '>' . h($v) . '</option>'; ?></select>
           <button class="btn btn-pri" style="margin-top:14px">Salvar dados</button>
         </form>
         <?php if ($g['roteiro_url']): ?><p style="margin-top:12px"><a class="btn btn-pq" href="<?= h($g['roteiro_url']) ?>" target="_blank" rel="noopener">📄 Abrir roteiro</a></p><?php endif; ?>
+      </div>
+      <div class="cartao">
+        <h2>Hotsite da excursão</h2>
+        <?php if ($g['hotsite_token'] && $g['hotsite_ativo']): $hot = url_site() . '/g/?t=' . $g['hotsite_token']; ?>
+          <p class="mudo" style="margin:0 0 8px">Página pública no ar. As vagas atualizam sozinhas conforme você confirma participantes.</p>
+          <div style="display:flex;gap:6px"><input id="hotlink" readonly value="<?= h($hot) ?>" onclick="this.select()"><button type="button" class="btn btn-pq" onclick="navigator.clipboard.writeText(document.getElementById('hotlink').value);this.textContent='Copiado!'">Copiar</button></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+            <a class="btn btn-pq btn-pri" href="<?= h($hot) ?>" target="_blank" rel="noopener">Abrir hotsite</a>
+            <a class="btn btn-pq" href="./?p=grupoprompt&id=<?= $g['id'] ?>&tipo=flyer">Gerar prompt do flyer</a>
+            <a class="btn btn-pq" href="./?p=grupoprompt&id=<?= $g['id'] ?>&tipo=roteiro">Gerar prompt do roteiro</a>
+            <form method="post" action="./?p=acao&a=grupo_hotsite" onsubmit="return confirm('Tirar o hotsite do ar? O link deixa de funcionar.')"><?= csrf_campo() ?><input type="hidden" name="id" value="<?= $g['id'] ?>"><input type="hidden" name="op" value="despublicar"><button class="btn btn-pq btn-perigo">Despublicar</button></form>
+          </div>
+          <?php if (!$g['chamada']): ?><p class="aviso atencao" style="margin-top:10px;font-size:13px">Dica: preencha a <b>Chamada do hotsite</b> nos dados ao lado para a página ficar mais convidativa.</p><?php endif; ?>
+        <?php else: ?>
+          <p class="mudo" style="margin:0 0 10px">Publique uma página pública desta excursão (padrão da agência, com vagas ao vivo e botões "Tenho interesse" e WhatsApp) para divulgar no Instagram, WhatsApp e anúncios.</p>
+          <form method="post" action="./?p=acao&a=grupo_hotsite"><?= csrf_campo() ?><input type="hidden" name="id" value="<?= $g['id'] ?>"><input type="hidden" name="op" value="publicar"><button class="btn btn-pri">Publicar hotsite</button></form>
+        <?php endif; ?>
       </div>
       <div class="cartao">
         <h2 style="font-size:17px">Próximas fases</h2>
@@ -197,10 +215,10 @@ function acao_grupos($a) {
         $ini = data_valida($_POST['data_inicio'] ?? ''); $fim = data_valida($_POST['data_fim'] ?? '');
         $status = array_key_exists($_POST['status'] ?? '', GRUPO_STATUS) ? $_POST['status'] : $g['status'];
         $moeda = array_key_exists($_POST['moeda'] ?? '', MOEDAS) ? $_POST['moeda'] : 'BRL';
-        q('UPDATE grupos SET titulo = ?, destino = ?, data_inicio = ?, data_fim = ?, periodo = ?, vagas_total = ?, vagas_minimo = ?, valor = ?, moeda = ?, roteiro_url = ?, descricao = ?, status = ?, atualizado_em = ? WHERE id = ?',
+        q('UPDATE grupos SET titulo = ?, destino = ?, data_inicio = ?, data_fim = ?, periodo = ?, vagas_total = ?, vagas_minimo = ?, valor = ?, moeda = ?, roteiro_url = ?, chamada = ?, descricao = ?, status = ?, atualizado_em = ? WHERE id = ?',
           [post('titulo', 120) ?: 'Novo grupo', post('destino', 120), $ini, $fim, post('periodo', 120),
            max(0, (int)($_POST['vagas_total'] ?? 0)), max(0, (int)($_POST['vagas_minimo'] ?? 0)),
-           (float)str_replace(',', '.', $_POST['valor'] ?? '0'), $moeda, post('roteiro_url', 300), post('descricao', 3000), $status, agora(), $g['id']]);
+           (float)str_replace(',', '.', $_POST['valor'] ?? '0'), $moeda, post('roteiro_url', 300), post('chamada', 2000), post('descricao', 3000), $status, agora(), $g['id']]);
         registrar('editou grupo', $g['codigo']);
         redirecionar('./?p=grupo&id=' . $g['id'], 'Dados do grupo salvos.');
 
@@ -221,6 +239,18 @@ function acao_grupos($a) {
         q('UPDATE grupo_participantes SET etapa = ?, atualizado_em = ? WHERE id = ?', [$etapa, agora(), $p['id']]);
         redirecionar('./?p=grupo&id=' . $p['grupo_id'], 'Participante movido para ' . GRUPO_ETAPAS[$etapa] . '.');
 
+    case 'grupo_hotsite':
+        $g = grupo_ou_sai($_POST['id'] ?? 0);
+        if (($_POST['op'] ?? '') === 'despublicar') {
+            q('UPDATE grupos SET hotsite_ativo = 0, atualizado_em = ? WHERE id = ?', [agora(), $g['id']]);
+            registrar('despublicou hotsite', $g['codigo']);
+            redirecionar('./?p=grupo&id=' . $g['id'], 'Hotsite tirado do ar.');
+        }
+        $tok = $g['hotsite_token'] ?: bin2hex(random_bytes(12)); // mantém o mesmo link ao republicar
+        q('UPDATE grupos SET hotsite_token = ?, hotsite_ativo = 1, atualizado_em = ? WHERE id = ?', [$tok, agora(), $g['id']]);
+        registrar('publicou hotsite', $g['codigo']);
+        redirecionar('./?p=grupo&id=' . $g['id'], 'Hotsite publicado! Copie o link e divulgue.');
+
     case 'grupo_excluir':
         $g = grupo_ou_sai($_POST['id'] ?? 0);
         q('DELETE FROM grupos WHERE id = ?', [$g['id']]);
@@ -229,3 +259,47 @@ function acao_grupos($a) {
     }
     http_response_code(404); exit('Ação desconhecida.');
 }
+
+// ===================== GERADOR DE PROMPTS (flyer / roteiro) =====================
+function prompt_grupo($g, $tipo) {
+    $periodo = $g['data_inicio'] ? data_br($g['data_inicio']) . ($g['data_fim'] ? ' a ' . data_br($g['data_fim']) : '') : ($g['periodo'] ?: 'datas a definir');
+    $dur = ($g['data_inicio'] && $g['data_fim']) ? duracao_viagem($g['data_inicio'], $g['data_fim']) : '';
+    $valor = $g['valor'] > 0 ? moeda_fmt($g['valor'], $g['moeda']) . ' por pessoa' : 'sob consulta';
+    $destino = $g['destino'] ?: $g['titulo'];
+    $titulo = $g['titulo'] ?: $g['destino'];
+    $chamada = trim((string)$g['chamada']) ?: '(sem chamada definida — escreva uma linha convidativa sobre a viagem)';
+    $wa = agencia_whats(); $nome = agencia_nome();
+    if ($tipo === 'roteiro') {
+        return "Use a skill vanessa-roteiro-html para montar o roteiro em HTML desta EXCURSÃO EM GRUPO, no padrão \"passaporte\" da $nome.\n\n"
+            . "Título: $titulo\nDestino: $destino\nPeríodo: $periodo" . ($dur ? " ($dur)" : '') . "\nValor de referência: $valor (não invente outros preços; se citar, use \"a partir de\").\nPúblico: grupo/excursão acompanhada.\n\n"
+            . "Chamada da viagem: $chamada\n\n"
+            . "Monte uma timeline dia a dia coerente com o destino e o período, com dicas específicas (nunca genéricas). Não inclua dados de passageiros, custos internos, comissão ou markup. Ao final, liste o que ficou faltando para eu completar.";
+    }
+    // flyer
+    return "Crie um flyer promocional para redes sociais (quadrado 1080x1080) desta EXCURSÃO EM GRUPO da $nome.\n\n"
+        . "Padrão visual \"passaporte\": azul-marinho #1B2A4A, azul #3D5A8A, títulos em serifada (Georgia), rótulos em Courier New maiúsculo, SEM fotos de pessoas (use formas, mapas estilizados ou texturas).\n\n"
+        . "Destaques do flyer:\n- Destino: $destino\n- Quando: $periodo" . ($dur ? " ($dur)" : '') . "\n- A partir de: $valor\n- Selo de \"vagas limitadas\"\n- Chamada: $chamada\n- CTA para o WhatsApp" . ($wa ? " $wa" : '') . "\n\n"
+        . "Gere o flyer e, além dele, 3 variações de legenda curtas para o Instagram (com emojis moderados e uma frase de urgência).";
+}
+
+function pagina_grupo_prompt($id) {
+    exigir_login();
+    $g = grupo_ou_sai($id);
+    $tipo = ($_GET['tipo'] ?? '') === 'roteiro' ? 'roteiro' : 'flyer';
+    $txt = prompt_grupo($g, $tipo);
+    $rotulo = $tipo === 'roteiro' ? 'Prompt do roteiro' : 'Prompt do flyer';
+    topo($g['codigo'] . ' · ' . $rotulo, 'grupos'); ?>
+  <div class="cab"><div>
+    <p class="mudo" style="margin:0"><a href="./?p=grupos">Grupos</a> › <a href="./?p=grupo&id=<?= $g['id'] ?>"><?= h($g['codigo']) ?></a> › <?= h($rotulo) ?></p>
+    <h1><?= h($rotulo) ?></h1>
+    <p class="mudo" style="margin:4px 0 0">Copie o texto abaixo e cole no Claude para gerar o material. Ajuste o que quiser antes.</p>
+  </div></div>
+  <div class="cartao">
+    <textarea id="pr" style="min-height:320px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px"><?= h($txt) ?></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button type="button" class="btn btn-pri" onclick="navigator.clipboard.writeText(document.getElementById('pr').value);this.textContent='Copiado!'">Copiar texto</button>
+      <a class="btn" href="./?p=grupo&id=<?= $g['id'] ?>">Voltar ao grupo</a>
+      <a class="btn" href="./?p=grupoprompt&id=<?= $g['id'] ?>&tipo=<?= $tipo === 'roteiro' ? 'flyer' : 'roteiro' ?>"><?= $tipo === 'roteiro' ? 'Ver prompt do flyer' : 'Ver prompt do roteiro' ?></a>
+    </div>
+  </div>
+<?php rodape(); }

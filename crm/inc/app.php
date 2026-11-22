@@ -2,7 +2,7 @@
 // Vanessa Viagens e Turismo · CRM — núcleo
 require dirname(__DIR__, 2) . '/dados/lib.php';
 
-const CRM_VERSAO = 17;
+const CRM_VERSAO = 18;
 const MODELOS_IA = ['claude-haiku-5-5' => 'Claude Haiku (rápido e barato)', 'claude-sonnet-5-5' => 'Claude Sonnet (melhor qualidade)'];
 const ETAPA_ENTREGA = 'entrega'; // entrega de vouchers avulsa, fora do funil
 const MOEDAS = ['BRL' => 'Real (R$)', 'USD' => 'Dólar (US$)', 'EUR' => 'Euro (€)'];
@@ -283,6 +283,12 @@ CREATE TABLE IF NOT EXISTS grupo_participantes (
 CREATE INDEX IF NOT EXISTS ix_grupo_part ON grupo_participantes(grupo_id);
 SQL);
     }
+    if ($v < 18) {
+        // Módulo de Grupos — Fase 2: hotsite público por grupo (token + publicação).
+        foreach (['hotsite_token TEXT', 'hotsite_ativo INTEGER NOT NULL DEFAULT 0', 'chamada TEXT'] as $col)
+            $pdo->exec("ALTER TABLE grupos ADD COLUMN $col");
+        $pdo->exec("CREATE INDEX IF NOT EXISTS ix_grupo_hotsite ON grupos(hotsite_token)");
+    }
     $pdo->exec('PRAGMA user_version = ' . CRM_VERSAO);
 }
 
@@ -464,6 +470,17 @@ function data_valida($d) { return preg_match('/^\d{4}-\d{2}-\d{2}$/', $d) ? $d :
 function reais($v) { if ($v === null || $v === '') return ''; $f = (float)$v; return 'R$ ' . number_format($f, fmod($f, 1) ? 2 : 0, ',', '.'); }
 function num_valor($s) { $s = preg_replace('/[^\d,\.]/', '', (string)$s); if ($s === '') return null; $s = str_replace('.', '', $s); return (float)str_replace(',', '.', $s); }
 function primeiro_nome($n) { return explode(' ', trim($n))[0]; }
+// Identidade da agência (configurável por instalação via dados/config.php; defaults = Vanessa Viagens).
+function agencia_nome()  { return defined('AGENCIA_NOME') && AGENCIA_NOME !== '' ? AGENCIA_NOME : 'Vanessa Viagens e Turismo'; }
+function agencia_whats() { return defined('AGENCIA_WHATSAPP') && AGENCIA_WHATSAPP !== '' ? AGENCIA_WHATSAPP : '+55 11 97543-9074'; }
+function agencia_insta() { return defined('AGENCIA_INSTAGRAM') && AGENCIA_INSTAGRAM !== '' ? AGENCIA_INSTAGRAM : '@vanessaviagenseturismo'; }
+/** URL pública base (esquema + host) a partir da requisição atual. */
+function url_site() {
+    if (defined('SITE_URL') && SITE_URL !== '') return rtrim(SITE_URL, '/');
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $esq = (($_SERVER['HTTPS'] ?? '') === 'on' || ($_SERVER['SERVER_PORT'] ?? '') == 443) ? 'https' : 'http';
+    return $esq . '://' . $host;
+}
 function so_digitos($t) { return preg_replace('/\D/', '', (string)$t); }
 function link_whats($tel, $texto = '') {
     $d = so_digitos($tel); if (strlen($d) < 10) return '';

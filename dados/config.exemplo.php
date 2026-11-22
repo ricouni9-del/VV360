@@ -15,6 +15,15 @@ const EMAIL_PROPOSTAS = 'contato@suaagencia.com.br';
 const EMAIL_REMETENTE = 'site@suaagencia.com.br';
 
 // ============================================================
+//  IDENTIDADE DA AGÊNCIA (usada no site, hotsites de grupos e materiais)
+// ============================================================
+const AGENCIA_NOME      = 'Sua Agência de Viagem';
+const AGENCIA_WHATSAPP  = '+55 11 90000-0000';
+const AGENCIA_INSTAGRAM = '@suaagencia';
+// Endereço público do site (sem barra no fim). Em branco = detecta pelo domínio do acesso.
+const SITE_URL = '';
+
+// ============================================================
 //  CRM (pasta crm/)
 // ============================================================
 
